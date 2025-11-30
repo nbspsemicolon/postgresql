@@ -1,2 +1,5 @@
-# postgresql
-A container for PostgreSQL/pgEdge with TimescaleDB baked in.
+# A container for pgEdge PostgreSQL with TimescaleDB / TigerData
+
+It's a mashup!
+
+The postgres **UID** is set to **1000** to eliminate guesswork.

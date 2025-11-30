@@ -2,23 +2,7 @@ FROM docker.io/almalinux:9
 
 COPY --chmod=755 docker-entrypoint.sh docker-ensure-initdb.sh /usr/local/bin/
 
-COPY <<EOF /etc/yum.repos.d/timescale.repo
-[timescale_timescaledb]
-name=timescale_timescaledb
-baseurl=https://packagecloud.io/timescale/timescaledb/el/9/\$basearch
-repo_gpgcheck=0
-gpgcheck=0
-enabled=1
-gpgkey=https://packagecloud.io/timescale/timescaledb/gpgkey
-sslverify=0
-sslcacert=/etc/pki/tls/certs/ca-bundle.crt
-metadata_expire=300
-EOF
-
-COPY <<EOF /etc/locale.conf
-LANG="en_US.UTF-8"
-LC_ALL="en_US.UTF-8"
-EOF
+COPY --chmod=644 timescale.repo /etc/yum.repos.d/
 
 RUN <<EOF
 #!/usr/bin/bash
@@ -60,6 +44,9 @@ rm -rf /usr/share/man/*
 
 install --verbose --directory --owner root --group root --mode 0755 /docker-entrypoint-initdb.d
 install --verbose --directory --owner postgres --group postgres --mode 1777 /data
+
+echo 'LANG="en_US.UTF-8"' > /etc/locale.conf
+echo 'LC_ALL="en_US.UTF-8"' >> /etc/locale.conf
 
 pip install wheel
 pip install 'patroni[etcd,jsonlogger]==4.1.0'

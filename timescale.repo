@@ -1,0 +1,9 @@
+name=timescale_timescaledb
+baseurl=https://packagecloud.io/timescale/timescaledb/el/9/\$basearch
+repo_gpgcheck=0
+gpgcheck=0
+enabled=1
+gpgkey=https://packagecloud.io/timescale/timescaledb/gpgkey
+sslverify=0
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+metadata_expire=300

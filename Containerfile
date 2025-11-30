@@ -63,7 +63,6 @@ install --verbose --directory --owner postgres --group postgres --mode 1777 /dat
 
 pip install wheel
 pip install 'patroni[etcd,jsonlogger]==4.1.0'
-
 ENDRUN
 
 USER postgres

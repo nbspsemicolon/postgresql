@@ -2,16 +2,7 @@ FROM docker.io/almalinux:9
 
 COPY --chmod=755 docker-entrypoint.sh docker-ensure-initdb.sh /usr/local/bin/
 
-RUN <<ENDRUN
-#!/usr/bin/bash
-
-set -o errexit
-set -o pipefail
-set -o nounset
-
-useradd -mUu 1000 postgres -s /usr/bin/bash
-
-cat <<REPOFILE > /etc/yum.repos.d/timescale.repo
+COPY <<EOF /etc/yum.repos.d/timescale.repo
 [timescale_timescaledb]
 name=timescale_timescaledb
 baseurl=https://packagecloud.io/timescale/timescaledb/el/9/\$basearch
@@ -22,7 +13,21 @@ gpgkey=https://packagecloud.io/timescale/timescaledb/gpgkey
 sslverify=0
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 metadata_expire=300
-REPOFILE
+EOF
+
+COPY <<EOF /etc/locale.conf
+LANG="en_US.UTF-8"
+LC_ALL="en_US.UTF-8"
+EOF
+
+RUN <<EOF
+#!/usr/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+useradd -mUu 1000 postgres -s /usr/bin/bash
 
 dnf install -y epel-release dnf
 dnf config-manager --set-enabled crb
@@ -53,17 +58,13 @@ rm -rf /var/cache/dnf/*
 rm -rf /usr/share/doc/*
 rm -rf /usr/share/man/*
 
-cat <<ENDLOCALE > /etc/locale.conf
-LANG=en_US.UTF-8
-LC_ALL=en_US.UTF-8
-ENDLOCALE
-
 install --verbose --directory --owner root --group root --mode 0755 /docker-entrypoint-initdb.d
 install --verbose --directory --owner postgres --group postgres --mode 1777 /data
 
 pip install wheel
 pip install 'patroni[etcd,jsonlogger]==4.1.0'
-ENDRUN
+
+EOF
 
 USER postgres
 

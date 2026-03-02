@@ -4,13 +4,17 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/README.md'
+      - '.github/**'
   schedule:
     - cron: '05 20 * * 5'  # 8:05pm UTC fri
   push:
     branches:
       - main
     paths-ignore:
-      - '**/*.md'
+      - '**/README.md'
+      - '.github/**'
   workflow_dispatch:
 
 env:
@@ -35,6 +39,14 @@ jobs:
       id-token: write
 
     steps:
+      - name: remove unneeded runner software
+        run: |
+          df -h
+          du -chs     /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
+          sudo rm -fr /usr/share/dotnet /usr/local/lib/android /opt/microsoft || true
+          sudo docker image prune --all --force || true
+          df -h
+
       - name: Prepare environment
         run: |
           # Lowercase the image uri

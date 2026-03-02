@@ -18,6 +18,8 @@ clean_image() {
   rm -rf /var/cache/dnf/*
   rm -rf /usr/share/doc/*
   rm -rf /usr/share/man/*
+
+  chmod a-x "$0"
 }
 
 build_base() {
@@ -44,8 +46,6 @@ build_base() {
   install --verbose --directory --owner root --group root --mode 0755 /docker-entrypoint-initdb.d
   install --verbose --directory --owner postgres --group postgres --mode 1777 /data
   install --verbose --directory --owner postgres --group postgres --mode 1777 /wal
-
-  clean_image
 }
 
 build_pgedge() {
@@ -58,8 +58,6 @@ build_pgedge() {
     pgedge-postgresql18 \
     pgedge-spock50_18 \
     pgedge-lolor_18
-
-  clean_image
 }
 
 build_plugins() {
@@ -67,6 +65,21 @@ build_plugins() {
     echo "run $0 base first"
     exit 1
   fi
+
+cat << EOF > /etc/yum.repos.d/timescale.repo
+[timescale_timescaledb]
+name=timescale_timescaledb
+baseurl=https://packagecloud.io/timescale/timescaledb/el/9/$(/usr/bin/arch)
+repo_gpgcheck=0
+gpgcheck=0
+enabled=1
+gpgkey=https://packagecloud.io/timescale/timescaledb/gpgkey
+sslverify=0
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+metadata_expire=300
+EOF
+
+  dnf makecache
 
   dnf install -y \
     pgedge-pgaudit_18 \
@@ -80,8 +93,7 @@ build_plugins() {
   pip install wheel
   pip install 'patroni[etcd,jsonlogger]==4.1.0'
 
-  clean_image
-  chmod a-x "$0"
+  /usr/bin/timescaledb-tune --pg-config=/usr/pgsql-18/bin/pg_config
 }
 
 case "$BUILD_CMD" in
@@ -93,6 +105,9 @@ case "$BUILD_CMD" in
     ;;
   "plugins")
     build_plugins
+    ;;
+  "clean")
+    clean_image
     ;;
   *)
     echo "script argument should be base, pgedge or plugins."

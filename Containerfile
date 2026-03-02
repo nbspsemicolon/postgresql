@@ -1,15 +1,18 @@
 FROM docker.io/almalinux:9 as base
 
-COPY --chmod=755 docker-entrypoint.sh docker-ensure-initdb.sh container-build.sh /usr/local/bin/
-COPY --chmod=644 timescale.repo /etc/yum.repos.d/
+COPY --chmod=755 src/*.sh /usr/local/bin/
+COPY --chmod=644 src/timescale.repo /etc/yum.repos.d/
 
-RUN container-build.sh base
+RUN cat /etc/yum.repos.d/timescale.repo
+
+RUN /usr/local/bin/container-build.sh base
 
 FROM base as pgedge
-RUN container-build.sh pgedge
+RUN /usr/local/bin/container-build.sh pgedge
 
 FROM pgedge as plugins
-RUN container-build.sh plugins
+RUN /usr/local/bin/container-build.sh plugins
+RUN /usr/local/bin/container-build.sh clean
 
 FROM plugins
 ENV PG_MAJOR="18"

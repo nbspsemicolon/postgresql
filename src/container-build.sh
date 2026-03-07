@@ -93,7 +93,7 @@ EOF
   pip install wheel
   pip install 'patroni[etcd,jsonlogger]==4.1.0'
 
-  /usr/bin/timescaledb-tune --pg-config=/usr/pgsql-18/bin/pg_config
+  # /usr/bin/timescaledb-tune --pg-config=/usr/pgsql-18/bin/pg_config
 }
 
 case "$BUILD_CMD" in
